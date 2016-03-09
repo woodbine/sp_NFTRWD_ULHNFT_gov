@@ -85,7 +85,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "NFTRWD_ULHNFT_gov"
-url = "http://www.ulh.nhs.uk/about_us/freedom_of_information/publication_of_spend_over_25000.asp"
+url = "https://www.ulh.nhs.uk/publication-of-spend-over-25000/"
 errors = 0
 data = []
 
@@ -98,19 +98,25 @@ soup = BeautifulSoup(html, 'lxml')
 #### SCRAPE DATA
 
 
-links = soup.find_all('a', 'csv')
+links = soup.find_all('a')
 for link in links:
-    if '.csv' in link['href'] or '.xls' in link['href'] or '.xlsx' in link['href']:
-        if 'http://' not in link['href']:
-            url = 'http://www.ulh.nhs.uk/about_us/freedom_of_information/'+link['href']
-        if 'http://' in link['href']:
+    try:
+        if '.csv' in link['href'] or '.xls' in link['href'] or '.xlsx' in link['href'] and 'Spend' in link.text:
+            # if 'http://' not in link['href']:
+            #     url = 'http://www.ulh.nhs.uk/about_us/freedom_of_information/'+link['href']
             url = link['href']
-        title = link.text.strip().split('25k_')[-1].strip()
-        csvMth = title.split('_')[-1][:3]
-        csvYr = title.split('_')[0][-4:]
-        csvMth = convert_mth_strings(csvMth.upper())
-        data.append([csvYr, csvMth, url])
+            title = link.text.strip().split(u'25k – ')[-1].strip()
+            csvMth = title.split(u' – ')[-1].strip()
+            csvYr = title[:4]
+            if '20' in csvMth:
+                csvMth = title.split()[1][:3]
+            else:
+                csvMth = csvMth[:3]
+            csvMth = convert_mth_strings(csvMth.upper())
+            data.append([csvYr, csvMth, url])
+    except:
 
+        pass
 
 #### STORE DATA 1.0
 
